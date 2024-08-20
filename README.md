@@ -1,5 +1,6 @@
 # openlane_editor
 
+```bash
 E00_V01_data_processing
 └─ output_v01_validation
      └─ pickle
@@ -29,6 +30,9 @@ E01_V09_editor
          ├─ datalist_video.pickle
          └─ datalist.pickle
 
+```
+
+```
 .
 ├── LICENSE
 ├── README.md
@@ -55,3 +59,4 @@ E01_V09_editor
     └── window.py
 
 6 directories, 17 files
+```

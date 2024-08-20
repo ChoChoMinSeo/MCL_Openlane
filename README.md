@@ -32,31 +32,10 @@ E01_V09_editor
 
 ```
 
-```
-.
-├── LICENSE
-├── README.md
-├── main.py
-├── options
-│   ├── __pycache__
-│   │   ├── args.cpython-311.pyc
-│   │   └── config.cpython-311.pyc
-│   ├── args.py
-│   └── config.py
-├── tree.txt
-└── ui_tools
-    ├── __pycache__
-    │   ├── ui.cpython-311.pyc
-    │   ├── utils.cpython-311.pyc
-    │   └── window.cpython-311.pyc
-    ├── ui.py
-    ├── utils
-    │   ├── __pycache__
-    │   │   ├── utils.cpython-311.pyc
-    │   │   └── vis_utils.cpython-311.pyc
-    │   ├── utils.py
-    │   └── vis_utils.py
-    └── window.py
+좌우 방향키: 다음/이전 이미지집
 
-6 directories, 17 files
-```
+상하 방향키: 다음/이전 영상(폴더)
+
+delete: 현재 선택된 차선 삭제
+
+xy/yz plane: 마우스 드래그로 차선 편집

@@ -115,7 +115,7 @@ class Editor(object):
     def on_click_progress(self):
         def click_pr(event,x,y,flags,param):
             if event == cv2.EVENT_LBUTTONDOWN:
-                print('# scene 입력: ')
+                print('이동할 scene 번호 입력: ')
                 try:
                     pos = int(input())-1
                 except:
@@ -254,16 +254,12 @@ class Editor(object):
         self.generate_video_datalist()
         self.datalist_video = load_pickle(f'{self.cfg.dir["out"]}/pickle/datalist_video')
         self.datalist_scene = list(self.datalist_video)
-
         self.datalist = list()
-
         for i in range(len(self.datalist_scene)):
             video_name = self.datalist_scene[i]
             temp_datalist = self.datalist_video[video_name]
             # 각 이미지 별로
             self.datalist += temp_datalist
-
-
         self.cur_scene_idx = 0
         self.cur_img_idx = 0
         # try:

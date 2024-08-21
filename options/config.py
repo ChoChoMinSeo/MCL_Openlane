@@ -13,7 +13,6 @@ class Config(object):
 
         self.dir['proj'] = os.path.dirname(os.getcwd())
         self.dir['head_proj'] = os.path.dirname(self.dir['proj'])
-        # self.dir['pre0'] = f'{self.dir["head_proj"]}/E00_V01_data_processing/output_v01_{self.datalist_mode}/pickle'
         self.dir['pre0'] = f'{self.dir["head_proj"]}/E01_V08_lane_selection_after_als2/output_v02_{self.datalist_mode}/pickle'
         self.dir['backup'] = f'{self.dir["head_proj"]}/E01_V08_lane_selection_after_als2/output_v02_{self.datalist_mode}/pickle/results'
         self.dir['out'] = f'{os.getcwd().replace("code", "output")}_{self.datalist_mode}'

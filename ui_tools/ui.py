@@ -5,6 +5,7 @@ from ui_tools.utils.vis_utils import *
 from ui_tools.window import Windows
 from copy import deepcopy
 from scipy.interpolate import interp1d
+from tqdm import tqdm
 
 class Editor(object):
     def __init__(self,cfg):
@@ -100,13 +101,11 @@ class Editor(object):
                 datas = deepcopy(self.datas[self.cur_img_idx])
                 datas[self.cur_lane_idx][self.y_idx,axis]+=self.move
                 self.window.draw_plane(self.cur_lane_idx, datas = datas, xy = xy)
-
             elif self.plane_flag and event == cv2.EVENT_LBUTTONUP:
                 self.plane_flag = False
                 self.datas[self.cur_img_idx][self.cur_lane_idx][self.y_idx,axis]+=self.move
                 # interpolate near points
                 self.interpolate(axis)
-
                 self.window.draw_plane(self.cur_lane_idx, datas = self.datas[self.cur_img_idx], xy = xy)
                 self.window.draw_3d(line_idx=self.cur_lane_idx, datas = self.datas[self.cur_img_idx])
                 self.img_coords,(self.img_h,self.img_w) = self.window.draw_img(img = self.imgs[self.cur_img_idx],line_idx=self.cur_lane_idx, datas = self.datas[self.cur_img_idx], P_gt=self.P_gt)
@@ -171,9 +170,11 @@ class Editor(object):
         cv2.createTrackbar('scene','progress',self.cur_scene_idx,len(self.datalist_scene)-1,self.scene_trackbar_on_change)
         cv2.createTrackbar('image','progress',self.cur_img_idx,len(self.datas)-1,self.img_trackbar_on_change)
 
-    def init(self):
-        self.datalist = list()
-        self.datalist_error = list()
+    def reset_cur_data(self):
+        scene_name = self.datalist_scene[self.cur_scene_idx]
+        img_name = self.datalist_video[scene_name][self.cur_img_idx]
+        data = load_pickle(f'{self.cfg.dir["backup"]}/{img_name}')
+        self.datas[self.cur_img_idx] = data['lane3d']['new_lane']
 
     def generate_video_datalist(self):
         datalist_org = load_pickle(f'{self.cfg.dir["pre0"]}/datalist')
@@ -187,11 +188,6 @@ class Editor(object):
             print(f'{i} ==> {name} done')
         save_pickle(f'{self.cfg.dir["out"]}/pickle/datalist_video', datalist_out)
         save_pickle(f'{self.cfg.dir["out"]}/pickle/datalist', datalist_out)
-    def reset_cur_data(self):
-        scene_name = self.datalist_scene[self.cur_scene_idx]
-        img_name = self.datalist_video[scene_name][self.cur_img_idx]
-        data = load_pickle(f'{self.cfg.dir["backup"]}/{img_name}')
-        self.datas[self.cur_img_idx] = data['lane3d']['new_lane']
 
     def load_data(self):
         self.datas = []
@@ -237,12 +233,36 @@ class Editor(object):
         self.window.draw_plane(self.cur_lane_idx, datas = self.datas[self.cur_img_idx], xy = False)
         self.window.draw_3d(line_idx=self.cur_lane_idx, datas = self.datas[self.cur_img_idx])
         self.img_coords,(self.img_h,self.img_w) = self.window.draw_img(img = self.imgs[self.cur_img_idx],line_idx=self.cur_lane_idx, datas = self.datas[self.cur_img_idx], P_gt=self.P_gt)
+    
+    def build_new_datalist(self):
+        print(f'build new datalist')
+        new_datalist_video = []
+        empty_scene = 0
+        for i in tqdm(range(len(self.datalist))):
+            img_name = self.datalist[i]
+            data = load_pickle(f'{self.cfg.dir["data_path"]}/{img_name}')
+            lanes = data['lane3d']['new_lane']
+            if len(lanes) == 0:
+                empty_scene += 1
+                continue
+            new_datalist_video.append(img_name)
+        save_pickle(f'{self.cfg.dir["out"]}/pickle/datalist', new_datalist_video)
+        print(f'{len(self.datalist)}->{len(new_datalist_video)}')
+        print(f'empty: {empty_scene}')
 
     def run(self):
-        self.init()
         self.generate_video_datalist()
         self.datalist_video = load_pickle(f'{self.cfg.dir["out"]}/pickle/datalist_video')
         self.datalist_scene = list(self.datalist_video)
+
+        self.datalist = list()
+
+        for i in range(len(self.datalist_scene)):
+            video_name = self.datalist_scene[i]
+            temp_datalist = self.datalist_video[video_name]
+            # 각 이미지 별로
+            self.datalist += temp_datalist
+
 
         self.cur_scene_idx = 0
         self.cur_img_idx = 0
@@ -290,20 +310,33 @@ class Editor(object):
                     self.reset_windows()
                     self.window.progress_window(len(self.datalist_scene),self.cur_scene_idx+1,len(self.datas),self.cur_img_idx+1)
                 elif key == 65535:
-                    # delete
-                    del self.datas[self.cur_img_idx][self.cur_lane_idx]
-                    self.reset_windows()
+                    # Delete key
+                    # delete lane
+                    if len(self.datas[self.cur_img_idx]) != 0:
+                        del self.datas[self.cur_img_idx][self.cur_lane_idx]
+                        self.modified = True
+                        self.reset_windows()
+                    else:
+                        print('empty frame!')
+                elif key == 65367:
+                    # End key
+                    # delete frame
+                    if len(self.datas[self.cur_img_idx]) != 0:
+                        self.datas[self.cur_img_idx] = []
+                        self.modified = True
+                        self.reset_windows()
+                    else:
+                        print('empty frame!')
                 elif key == ord('r'):
                     self.reset_cur_data()
                     self.reset_windows()
-
-                elif key == 65379:
-                    # insert
-                    print('l')
                 else:
                     print(key)
         except:
             self.save_data()
+            self.build_new_datalist()
             cv2.destroyAllWindows()
         # save
+        self.save_data()
+        self.build_new_datalist()
         cv2.destroyAllWindows()

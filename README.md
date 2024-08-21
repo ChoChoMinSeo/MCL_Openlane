@@ -6,9 +6,9 @@
      └─ pickle
           ├─ datalist.pickle
           └─ results
-         │   ├─ segment-1
-         │   ...
-         │   └─ segment-123123
+               ├─ segment-1
+                ...
+               └─ segment-123123
 
 E01_V09_editor
 ├─ code_v02

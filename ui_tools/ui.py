@@ -47,10 +47,7 @@ class Editor(object):
                         min_idx = i
                 if min_dist<30:
                     self.cur_lane_idx = min_idx
-                    self.window.draw_plane(self.cur_lane_idx, datas = self.datas[self.cur_img_idx], xy = True)
-                    self.window.draw_plane(self.cur_lane_idx, datas = self.datas[self.cur_img_idx], xy = False)
-                    self.window.draw_3d(line_idx=self.cur_lane_idx, datas = self.datas[self.cur_img_idx])
-                    self.img_coords,(self.img_h,self.img_w) = self.window.draw_img(img = self.imgs[self.cur_img_idx],line_idx=self.cur_lane_idx, datas = self.datas[self.cur_img_idx], P_gt=self.P_gt)
+                    self.reset_windows()
                 else:
                     print('lane not found!')
         cv2.setMouseCallback(win_name, click_img)
@@ -88,10 +85,7 @@ class Editor(object):
                         min_idx = i
                 if min_dist<thr:
                     self.cur_lane_idx = min_idx
-                    self.window.draw_plane(self.cur_lane_idx, datas = self.datas[self.cur_img_idx], xy = True)
-                    self.window.draw_plane(self.cur_lane_idx, datas = self.datas[self.cur_img_idx], xy = False)
-                    self.window.draw_3d(line_idx=self.cur_lane_idx, datas = self.datas[self.cur_img_idx])
-                    self.img_coords,(self.img_h,self.img_w) = self.window.draw_img(img = self.imgs[self.cur_img_idx],line_idx=self.cur_lane_idx, datas = self.datas[self.cur_img_idx], P_gt=self.P_gt)
+                    self.reset_windows()
                 else:
                     print('lane not found!')
                     return 0
@@ -193,6 +187,11 @@ class Editor(object):
             print(f'{i} ==> {name} done')
         save_pickle(f'{self.cfg.dir["out"]}/pickle/datalist_video', datalist_out)
         save_pickle(f'{self.cfg.dir["out"]}/pickle/datalist', datalist_out)
+    def reset_cur_data(self):
+        scene_name = self.datalist_scene[self.cur_scene_idx]
+        img_name = self.datalist_video[scene_name][self.cur_img_idx]
+        data = load_pickle(f'{self.cfg.dir["backup"]}/{img_name}')
+        self.datas[self.cur_img_idx] = data['lane3d']['new_lane']
 
     def load_data(self):
         self.datas = []
@@ -233,6 +232,12 @@ class Editor(object):
             img = img.astype(np.float32) / 255
             self.imgs.append(img)
 
+    def reset_windows(self):
+        self.window.draw_plane(self.cur_lane_idx, datas = self.datas[self.cur_img_idx], xy = True)
+        self.window.draw_plane(self.cur_lane_idx, datas = self.datas[self.cur_img_idx], xy = False)
+        self.window.draw_3d(line_idx=self.cur_lane_idx, datas = self.datas[self.cur_img_idx])
+        self.img_coords,(self.img_h,self.img_w) = self.window.draw_img(img = self.imgs[self.cur_img_idx],line_idx=self.cur_lane_idx, datas = self.datas[self.cur_img_idx], P_gt=self.P_gt)
+
     def run(self):
         self.init()
         self.generate_video_datalist()
@@ -255,20 +260,14 @@ class Editor(object):
                     self.save_data()
                     self.cur_img_idx = max(self.cur_img_idx-1,0)
                     self.cur_lane_idx = 0
-                    self.window.draw_plane(self.cur_lane_idx, datas = self.datas[self.cur_img_idx], xy = True)
-                    self.window.draw_plane(self.cur_lane_idx, datas = self.datas[self.cur_img_idx], xy = False)
-                    self.window.draw_3d(line_idx=self.cur_lane_idx, datas = self.datas[self.cur_img_idx])
-                    self.img_coords,(self.img_h,self.img_w) = self.window.draw_img(img = self.imgs[self.cur_img_idx],line_idx=self.cur_lane_idx, datas = self.datas[self.cur_img_idx], P_gt=self.P_gt)
+                    self.reset_windows()
                     self.window.progress_window(len(self.datalist_scene),self.cur_scene_idx+1,len(self.datas),self.cur_img_idx+1)
                 elif key == 65363:
                     # r arrow
                     self.save_data()
                     self.cur_img_idx = min(self.cur_img_idx+1,len(self.datalist_video[self.datalist_scene[self.cur_scene_idx]])-1)
                     self.cur_lane_idx = 0
-                    self.window.draw_plane(self.cur_lane_idx, datas = self.datas[self.cur_img_idx], xy = True)
-                    self.window.draw_plane(self.cur_lane_idx, datas = self.datas[self.cur_img_idx], xy = False)
-                    self.window.draw_3d(line_idx=self.cur_lane_idx, datas = self.datas[self.cur_img_idx])
-                    self.img_coords,(self.img_h,self.img_w) = self.window.draw_img(img = self.imgs[self.cur_img_idx],line_idx=self.cur_lane_idx, datas = self.datas[self.cur_img_idx], P_gt=self.P_gt)
+                    self.reset_windows()
                     self.window.progress_window(len(self.datalist_scene),self.cur_scene_idx+1,len(self.datas),self.cur_img_idx+1)
                 elif key == 65362:
                     # up arrow
@@ -278,10 +277,7 @@ class Editor(object):
                     self.cur_lane_idx = 0
                     self.load_img()
                     self.load_data()
-                    self.window.draw_plane(self.cur_lane_idx, datas = self.datas[self.cur_img_idx], xy = True)
-                    self.window.draw_plane(self.cur_lane_idx, datas = self.datas[self.cur_img_idx], xy = False)
-                    self.window.draw_3d(line_idx=self.cur_lane_idx, datas = self.datas[self.cur_img_idx])
-                    self.img_coords,(self.img_h,self.img_w) = self.window.draw_img(img = self.imgs[self.cur_img_idx],line_idx=self.cur_lane_idx, datas = self.datas[self.cur_img_idx], P_gt=self.P_gt)
+                    self.reset_windows()
                     self.window.progress_window(len(self.datalist_scene),self.cur_scene_idx+1,len(self.datas),self.cur_img_idx+1)
                 elif key == 65364:
                     # down arrow
@@ -291,18 +287,16 @@ class Editor(object):
                     self.cur_lane_idx = 0
                     self.load_img()
                     self.load_data()
-                    self.window.draw_plane(self.cur_lane_idx, datas = self.datas[self.cur_img_idx], xy = True)
-                    self.window.draw_plane(self.cur_lane_idx, datas = self.datas[self.cur_img_idx], xy = False)
-                    self.window.draw_3d(line_idx=self.cur_lane_idx, datas = self.datas[self.cur_img_idx])
-                    self.img_coords,(self.img_h,self.img_w) = self.window.draw_img(img = self.imgs[self.cur_img_idx],line_idx=self.cur_lane_idx, datas = self.datas[self.cur_img_idx], P_gt=self.P_gt)
+                    self.reset_windows()
                     self.window.progress_window(len(self.datalist_scene),self.cur_scene_idx+1,len(self.datas),self.cur_img_idx+1)
                 elif key == 65535:
                     # delete
                     del self.datas[self.cur_img_idx][self.cur_lane_idx]
-                    self.window.draw_plane(self.cur_lane_idx, datas = self.datas[self.cur_img_idx], xy = True)
-                    self.window.draw_plane(self.cur_lane_idx, datas = self.datas[self.cur_img_idx], xy = False)
-                    self.window.draw_3d(line_idx=self.cur_lane_idx, datas = self.datas[self.cur_img_idx])
-                    self.img_coords,(self.img_h,self.img_w) = self.window.draw_img(img = self.imgs[self.cur_img_idx],line_idx=self.cur_lane_idx, datas = self.datas[self.cur_img_idx], P_gt=self.P_gt)
+                    self.reset_windows()
+                elif key == ord('r'):
+                    self.reset_cur_data()
+                    self.reset_windows()
+
                 elif key == 65379:
                     # insert
                     print('l')

@@ -1,0 +1,3 @@
+[submodule "E01_V09_editor/code_v02"]
+	path = E01_V09_editor/code_v02
+	url = https://github.com/ChoChoMinSeo/openlane_editor.git

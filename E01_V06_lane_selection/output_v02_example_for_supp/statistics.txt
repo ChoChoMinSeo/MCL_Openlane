@@ -1,0 +1,7 @@
+segment-10203656353524179475_7625_000_7645_000_with_camera_labels: {'total': 976, 'short': 215, 'complex': 11, 'remain': 750}
+segment-1071392229495085036_1844_790_1864_790_with_camera_labels: {'total': 354, 'short': 177.0, 'complex': 0.0, 'remain': 177.0}
+segment-2367305900055174138_1881_827_1901_827_with_camera_labels: {'total': 1062, 'short': 197.0, 'complex': 2.0, 'remain': 863.0}
+total: 2392
+short: 589.0
+complex: 13.0
+remain: 1790.0
